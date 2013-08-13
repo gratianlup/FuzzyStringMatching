@@ -12,5 +12,6 @@ Uses a pre-built dictionary (represented by a [Trie](http://en.wikipedia.org/wik
 More details about the algorithm can be found in the following blog post:  
 [Damn Cool Algorithms: Levenshtein Automata](http://blog.notdot.net/2010/07/Damn-Cool-Algorithms-Levenshtein-Automata)
   
-A more theoretical presentation of the algorithm can be found in the following article:  
+A more theoretical presentation of the algorithm can be found in the following article  
+(not all ideas from the article are implemented yet):  
 [Fast string correction with Levenshtein automata](http://csi.ufs.ac.za/resres/files/Schultz.pdf)
