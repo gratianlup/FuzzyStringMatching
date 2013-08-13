@@ -1,7 +1,7 @@
 Fuzzy String Matching
 =====================
 
-#### Source code will be released in the near future.  
+##### Complete source code will be released in the near future.  
 
   
 Fuzzy string matching in a dictionary using a Levenshtein Automaton, implemented in Java.  
