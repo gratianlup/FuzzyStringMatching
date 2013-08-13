@@ -66,7 +66,7 @@ public class LevenshteinAutomaton {
                 Transition anyTransition = state.getAnyTransition(false);
 
                 if(anyTransition != null) {
-                    for(State nextState : anyTransition.nextStates) {
+                    for(State nextState : anyTransition.getNextStates()) {
                         outputStates.add(nextState);
                     }
                 }
@@ -82,9 +82,9 @@ public class LevenshteinAutomaton {
             Set<State> outputStates = new HashSet<State>();
 
             for(State state : states) {
-                for(Transition transition : state.transitions) {
-                    if(transition.letter == letter) {
-                        for(State nextState : transition.nextStates) {
+                for(Transition transition : state.getLetterTransitions()) {
+                    if(transition.getLetter() == letter) {
+                        for(State nextState : transition.getNextStates()) {
                             outputStates.add(nextState);
                         }
                     }
@@ -94,7 +94,7 @@ public class LevenshteinAutomaton {
                 Transition anyTransition = state.getAnyTransition(false);
 
                 if(anyTransition != null) {
-                    for(State nextAnyState : anyTransition.nextStates) {
+                    for(State nextAnyState : anyTransition.getNextStates()) {
                         outputStates.add(nextAnyState);
                     }
                 }
@@ -108,9 +108,9 @@ public class LevenshteinAutomaton {
             List<Character> letters = new ArrayList<Character>();
 
             for(State state : states) {
-                for(Transition transition : state.transitions) {
-                    if(!letters.contains(transition.letter)) {
-                        letters.add(transition.letter);
+                for(Transition transition : state.getLetterTransitions()) {
+                    if(!letters.contains(transition.getLetter())) {
+                        letters.add(transition.getLetter());
                     }
                 }
             }
@@ -122,7 +122,7 @@ public class LevenshteinAutomaton {
         // This happens when a least one state in the group is final.
         public boolean isFinalState() {
             for(State state : states) {
-                if(state.isFinal) {
+                if(state.isFinal()) {
                     return true;
                 }
             }
@@ -174,17 +174,17 @@ public class LevenshteinAutomaton {
             for(int i = 0; i < patternWord.length(); i++) {
                 // Matching letter.
                 Transition match = states[k][i].getTransition(patternWord.charAt(i), true);
-                match.nextStates.add(states[k][i + 1]);
+                match.addNextState(states[k][i + 1]);
 
                 if(k < maxError) {
                     // Inserted or substituted letter.
                     Transition insertion = states[k][i].getAnyTransition(true);
-                    insertion.nextStates.add(states[k + 1][i]);
-                    insertion.nextStates.add(states[k + 1][i + 1]);
+                    insertion.addNextState(states[k + 1][i]);
+                    insertion.addNextState(states[k + 1][i + 1]);
 
                     // Deleted letter.
                     Transition deletion = states[k][i].getEpsilonTransition(true);
-                    deletion.nextStates.add(states[k + 1][i + 1]);
+                    deletion.addNextState(states[k + 1][i + 1]);
                 }
             }
         }
@@ -193,15 +193,15 @@ public class LevenshteinAutomaton {
     }
 
     private String getEdgeLabel(Transition transition) {
-        switch(transition.type) {
+        switch(transition.getType()) {
             case Epsilon: return "Eps";
             case Any: return "*";
-            default: return String.valueOf(transition.letter);
+            default: return String.valueOf(transition.getLetter());
         }
     }
 
     private DotPrinter.Color getNodeColor(State state) {
-        if(state.isFinal) {
+        if(state.isFinal()) {
             return DotPrinter.Color.Green;
         }
         else return DotPrinter.Color.Gray;
@@ -214,11 +214,11 @@ public class LevenshteinAutomaton {
         }
         else visitedStates.add(state);
 
-        String label = state.isFinal ? "F" : " ";
+        String label = state.isFinal() ? "F" : " ";
         printer.createNode(state, label, DotPrinter.Shape.Circle,
                            getNodeColor(state));
-        for(Transition transition : state.transitions) {
-            for(State nextState : transition.nextStates) {
+        for(Transition transition : state.getLetterTransitions()) {
+            for(State nextState : transition.getNextStates()) {
                 exportStateToDOT(nextState, printer, visitedStates);
                 printer.createLink(state, nextState, getEdgeLabel(transition));
             }
@@ -244,13 +244,13 @@ public class LevenshteinAutomaton {
         while(!worklist.isEmpty()) {
             ExecutionState candidate = worklist.remove(worklist.size() - 1);
 
-            if(candidate.state.isFinal &&
+            if(candidate.state.isFinal() &&
                candidate.wordPosition == candidateWord.length()) {
                 // Reached an end state, word is accepted.
                 return true;
             }
 
-            for(Transition transition : candidate.state.transitions) {
+            for(Transition transition : candidate.state.getLetterTransitions()) {
                 evaluateNFATransition(transition, candidate, candidateWord, worklist);
             }
         }
@@ -262,25 +262,25 @@ public class LevenshteinAutomaton {
                                        String candidateWord, List<ExecutionState> worklist) {
         // Add to the worklist any state according to the current state
         // and the position reached into the candidate word.
-        switch(transition.type) {
+        switch(transition.getType()) {
             case Any: {
                 if(candidate.wordPosition < candidateWord.length()) {
-                    for(State nextState : transition.nextStates) {
+                    for(State nextState : transition.getNextStates()) {
                         worklist.add(new ExecutionState(nextState, candidate.wordPosition + 1));
                     }
                 }
                 break;
             }
             case Epsilon: {
-                for(State nextState : transition.nextStates) {
+                for(State nextState : transition.getNextStates()) {
                     worklist.add(new ExecutionState(nextState, candidate.wordPosition));
                 }
                 break;
             }
             case Letter: {
                 if(candidate.wordPosition < candidateWord.length() &&
-                   candidateWord.charAt(candidate.wordPosition) == transition.letter) {
-                    for(State nextState : transition.nextStates) {
+                   candidateWord.charAt(candidate.wordPosition) == transition.getLetter()) {
+                    for(State nextState : transition.getNextStates()) {
                         worklist.add(new ExecutionState(nextState, candidate.wordPosition + 1));
                     }
                 }
@@ -307,7 +307,7 @@ public class LevenshteinAutomaton {
             Transition epsilon = state.getEpsilonTransition(false);
 
             if(epsilon != null) {
-                for(State nextState : epsilon.nextStates) {
+                for(State nextState : epsilon.getNextStates()) {
                     if(!outputStates.contains(nextState)) {
                         uncheckedStates.add(nextState);
                     }
@@ -372,8 +372,8 @@ public class LevenshteinAutomaton {
     private boolean isDeadState(State state) {
         // A state is not required if there is no transition that can leave
         // the state (i.e. all transitions, if any, lead back to the state).
-        for(Transition transition : state.transitions) {
-            for(State nextState : transition.nextStates) {
+        for(Transition transition : state.getLetterTransitions()) {
+            for(State nextState : transition.getNextStates()) {
                 if(nextState != state) {
                     return false;
                 }
@@ -402,7 +402,7 @@ public class LevenshteinAutomaton {
             // Add the transition for any letter.
             if(currentGroup.anyTransition != null) {
                 State anyState = groupToState.get(currentGroup.anyTransition);
-                currentState.getAnyTransition(true).nextStates.add(anyState);
+                currentState.getAnyTransition(true).addNextState(anyState);
                 worklist.add(currentGroup.anyTransition);
             }
 
@@ -411,7 +411,7 @@ public class LevenshteinAutomaton {
                     currentGroup.letterTransitions.entrySet()) {
                 char letter = transition.getKey();
                 State letterState = groupToState.get(transition.getValue());
-                currentState.getTransition(letter, true).nextStates.add(letterState);
+                currentState.getTransition(letter, true).addNextState(letterState);
                 worklist.add(transition.getValue());
             }
         }
@@ -424,14 +424,14 @@ public class LevenshteinAutomaton {
             boolean leadsToDeadState = true;
 
             if(anyTransition != null) {
-                for(State nextState : anyTransition.nextStates) {
+                for(State nextState : anyTransition.getNextStates()) {
                     if(!isDeadState(nextState)) {
                         leadsToDeadState = false;
                         break;
                     }
                 }
 
-                if(leadsToDeadState && !state.isFinal) {
+                if(leadsToDeadState && !state.isFinal()) {
                     state.removeAnyTransition();
                 }
             }
@@ -451,18 +451,18 @@ public class LevenshteinAutomaton {
             ExecutionState candidate = worklist.remove(worklist.size() - 1);
 
             if(candidate.wordPosition == candidateWord.length()) {
-                if(candidate.state.isFinal) {
+                if(candidate.state.isFinal()) {
                     // Reached an end state, word is accepted.
                     return true;
                 }
                 else continue;
             }
 
-            for(Transition transition : candidate.state.transitions) {
-                if((transition.type == Transition.TransitionType.Any) ||
-                   ((transition.type == Transition.TransitionType.Letter) &&
-                    (candidateWord.charAt(candidate.wordPosition) == transition.letter))) {
-                    for(State nextState : transition.nextStates) {
+            for(Transition transition : candidate.state.getLetterTransitions()) {
+                if(transition.isAnyTransition() ||
+                   (transition.isLetterTransition() &&
+                    (candidateWord.charAt(candidate.wordPosition) == transition.getLetter()))) {
+                    for(State nextState : transition.getNextStates()) {
                         worklist.add(new ExecutionState(nextState, candidate.wordPosition + 1));
                     }
                 }

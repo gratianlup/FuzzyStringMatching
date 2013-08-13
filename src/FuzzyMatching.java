@@ -29,7 +29,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
-import java.io.BufferedWriter;
 import java.util.*;
 
 public class FuzzyMatching {
@@ -142,7 +141,7 @@ public class FuzzyMatching {
                     ExecutionState newState = new ExecutionState(trieChild, nextState, newWord);
                     worklist.add(newState);
 
-                    if(trieChild.isTerminator() && nextState.isFinal) {
+                    if(trieChild.isTerminator() && nextState.isFinal()) {
                         fuzzyStates.add(trieChild);
                         fuzzyWords.add(newWord);
                     }
@@ -170,7 +169,7 @@ public class FuzzyMatching {
                     ExecutionState newState = new ExecutionState(trieChild, nextState, newWord);
                     worklist.add(newState);
 
-                    if(trieChild.isTerminator() && nextState.isFinal) {
+                    if(trieChild.isTerminator() && nextState.isFinal()) {
                         matchingWords.add(newWord);
                     }
                 }
@@ -204,7 +203,7 @@ public class FuzzyMatching {
         }
 
         // Case 2: Error(wordB) == 0 && 1 <= Error(wordA) <= 2
-        //    =>   Exact(reversedWordB) && Fuzzy2(wordA)
+        //    =>   Exact(reversedWordB) && Fuzzy2(reversedWordA)
         Trie reversedMatchingStateB = findMatchingState(reversedWordB, reversedTrie);
 
         if(reversedMatchingStateB != null) {
@@ -273,13 +272,12 @@ public class FuzzyMatching {
                     ExecutionState newState = new ExecutionState(trieChild, nextState, newWord);
                     worklist.add(newState);
 
-                    if(trieChild.isTerminator() && nextState.isFinal) {
+                    if(trieChild.isTerminator() && nextState.isFinal()) {
                         // Found a final state/trie pair, remember the word.
                         matchingWords.add(newWord);
                     }
                 }
             }
-
         }
 
         return matchingWords;

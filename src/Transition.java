@@ -29,7 +29,6 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,9 +42,9 @@ public class Transition {
     }
 
 
-    public TransitionType type;
-    public char letter;            // Used only for TransitionType.Letter.
-    public List<State> nextStates; // A NFA can have multiple destination for the same transition.
+    private TransitionType type;
+    private char letter;            // Used only for TransitionType.Letter.
+    private List<State> nextStates; // A NFA can have multiple destination for the same transition.
 
     private Transition(TransitionType type, char letter) {
         this.type = type;
@@ -63,5 +62,33 @@ public class Transition {
 
     public static Transition createLetter(char letter) {
         return new Transition(TransitionType.Letter, letter);
+    }
+
+    public TransitionType getType() {
+        return type;
+    }
+
+    public boolean isAnyTransition() {
+        return type == TransitionType.Any;
+    }
+
+    public boolean isEpsilonTransition() {
+        return type == TransitionType.Epsilon;
+    }
+
+    public boolean isLetterTransition() {
+        return type == TransitionType.Letter;
+    }
+
+    public char getLetter() {
+        return letter;
+    }
+
+    public List<State> getNextStates() {
+        return nextStates;
+    }
+
+    public void addNextState(State state) {
+        nextStates.add(state);
     }
 }

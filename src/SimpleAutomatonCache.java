@@ -32,6 +32,9 @@
 import java.util.HashMap;
 import java.util.Map;
 
+// A very naive implementation of a cache for automatons for 1 and 2 errors.
+// Could be improved a lot by using a limit on the amount of automaton
+// and by keeping only the most frequently requested ones
 public class SimpleAutomatonCache implements AutomatonCache {
     private Map<String, LevenshteinAutomaton> automatonOneErrorCache;
     private Map<String, LevenshteinAutomaton> automatonTwoErrorsCache;

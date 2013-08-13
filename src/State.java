@@ -29,17 +29,16 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
-
 import java.util.ArrayList;
 import java.util.List;
 
 // Represents a state in a NFA or DFA.
 // For DFA no epsilon transitions exist anymore.
 public class State {
-    public boolean isFinal;              // Set if the state is an acceptance state.
-    public List<Transition> transitions; // Transitions on letters.
-    public Transition epsilonTransition; // Transitions on epsilon (multiple targets possible).
-    public Transition anyTransition;     // Transitions on any letter (multiple targets possible).
+    private boolean isFinal;              // Set if the state is an acceptance state.
+    private List<Transition> transitions; // Transitions on letters.
+    private Transition epsilonTransition; // Transitions on epsilon (multiple targets possible).
+    private Transition anyTransition;     // Transitions on any letter (multiple targets possible).
 
     public State(boolean isFinal) {
         this.isFinal = isFinal;
@@ -75,15 +74,15 @@ public class State {
     // Returns (or creates if requested) the transition associated
     // with the specified letter. Multiple target states are possible in a NFA.
     public Transition getTransition(char letter, boolean create) {
-        for(Transition transition : transitions) {
-            if(transition.letter == letter) {
+        for(Transition transition : getLetterTransitions()) {
+            if(transition.getLetter() == letter) {
                 return transition;
             }
         }
 
         if(create) {
             Transition transition = Transition.createLetter(letter);
-            transitions.add(transition);
+            getLetterTransitions().add(transition);
             return transition;
         }
         else return null;
@@ -99,17 +98,29 @@ public class State {
         epsilonTransition = null;
     }
 
+    public boolean isFinal() {
+        return isFinal;
+    }
 
+    // Returns the next state associated with the specified letter.
+    // If no such state exists, but the state has a transition for any letter,
+    // the corresponding state is returned instead, otherwise null.
+    // If multiple states can be reached the first one is returned,
     public State getStateForLetter(char letter) {
-        for(Transition transition : transitions) {
-            if(transition.letter == letter) {
-                return transition.nextStates.get(0);
+        for(Transition transition : getLetterTransitions()) {
+            if(transition.getLetter() == letter) {
+                return transition.getNextStates().get(0);
             }
         }
 
         if(anyTransition != null) {
-            return anyTransition.nextStates.get(0);
+            return anyTransition.getNextStates().get(0);
         }
         else return null;
+    }
+
+    // Returns the transitions associated with letters.
+    public List<Transition> getLetterTransitions() {
+        return transitions;
     }
 }
