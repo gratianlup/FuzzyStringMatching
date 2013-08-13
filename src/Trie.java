@@ -29,20 +29,25 @@
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Trie {
-    private boolean isTerminator;
+    private String terminatorWord;
     private Map<Character, Trie> children;
 
     public Trie() {
-        this.isTerminator = false;
         this.children = new HashMap<Character, Trie>();
     }
 
     public boolean isTerminator() {
-        return isTerminator;
+        return terminatorWord != null;
+    }
+
+    public String getWord() {
+        return terminatorWord;
     }
 
     public Map<Character, Trie> getChildren() {
@@ -75,7 +80,7 @@ public class Trie {
         }
         else {
             // No letters left, mark the terminal node.
-            isTerminator = true;
+            this.terminatorWord = word;
         }
     }
 
@@ -90,7 +95,7 @@ public class Trie {
     private int findWordHelper(String word, int position) {
         // Check if the current letter is found on one of the edges leaving
         // from this node. If it is, continue searching with the rest of the word.
-        int maxPosition = isTerminator ? position : 0;
+        int maxPosition = isTerminator() ? position : 0;
 
         if(position < word.length()) {
             Character letter = word.charAt(position);
@@ -112,5 +117,54 @@ public class Trie {
         }
 
         return findWordHelper(word, 0);
+    }
+
+    public List<String> findSimilarWords(String pattern, int maxError) {
+        // Implements a fairly simple search methods that runs
+        // the classic dynamic programming directly on the Trie.
+        List<String> similarWords = new ArrayList<String>();
+        int[] row = new int[pattern.length() + 1];
+
+        for(int i = 0; i <= pattern.length(); i++) {
+            row[i] = i;
+        }
+
+        for(Map.Entry<Character, Trie> entry : children.entrySet()) {
+            findSimilarWordsImpl(pattern, maxError,
+                                 entry.getKey(), entry.getValue(),
+                                 row, similarWords);
+        }
+
+        return similarWords;
+    }
+
+    private void findSimilarWordsImpl(String pattern, int maxError, char letter, Trie node,
+                                      int[] previousRow, List<String> similarWords) {
+        int[] currentRow = new int[pattern.length() + 1];
+        currentRow[0] = previousRow[0] + 1; // Compared to the empty string.
+        int minError = currentRow[0];
+
+        for(int i = 1; i <= pattern.length(); i++) {
+            int insertionConst = currentRow[i - 1] + 1;
+            int deletionCost = previousRow[i] + 1;
+            int substitutionCost = previousRow[i - 1] +
+                                   (pattern.charAt(i - 1) == letter ? 0 : 1);
+            currentRow[i] = Math.min(insertionConst, Math.min(deletionCost, substitutionCost));
+            minError = Math.min(minError, currentRow[i]);
+        }
+
+        // Check if an accepted word has been found.
+        if(currentRow[pattern.length()] <= maxError && node.isTerminator()) {
+            similarWords.add(node.getWord());
+        }
+
+        // Process the children if valid words could still be found.
+        if(minError <= maxError) {
+            for(Map.Entry<Character, Trie> entry : node.getChildren().entrySet()) {
+                findSimilarWordsImpl(pattern, maxError,
+                                     entry.getKey(), entry.getValue(),
+                                     currentRow, similarWords);
+            }
+        }
     }
 }
