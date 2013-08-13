@@ -1,9 +1,6 @@
 Fuzzy String Matching
 =====================
 
-##### Complete source code will be released in the near future.  
-
-  
 Fuzzy string matching in a dictionary using a Levenshtein Automaton, implemented in Java.  
 It retrieves all words that are similar to an incorrect query word. It can be used for spell checking, automatic correction of query words in search engines (Google's "Did you mean: X") and other NLP tasks. Compared to the classic dynamic-programming algorithm for computing the [Levenshtein distance](http://en.wikipedia.org/wiki/Levenshtein_distance), this approach scales very well to dictionaries with more than 2 million words.
 
