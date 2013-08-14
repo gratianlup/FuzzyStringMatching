@@ -34,62 +34,55 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Trie {
-    private String terminatorWord;
-    private Map<Character, Trie> children;
+public abstract class Trie {
+    // Used to store the <letter, child> pairs
+    // in a format independent from the actual Trie implementation.
+    public static class TrieChildren {
+        private char[] letters;
+        private Trie[] children;
 
-    public Trie() {
-        this.children = new HashMap<Character, Trie>();
+        public TrieChildren(int capacity) {
+            letters = new char[capacity];
+            children = new Trie[capacity];
+        }
+
+        public int size() {
+            return letters.length;
+        }
+
+        public void putPair(int index, char letter, Trie child) {
+            letters[index] = letter;
+            children[index] = child;
+        }
+
+        public char getLetter(int index) {
+            return letters[index];
+        }
+
+        public Trie getChild(int index) {
+            return children[index];
+        }
+
+        public Trie getChildForLetter(char letter) {
+            for(int i = 0; i < letters.length; i++) {
+                if(letters[i] == letter) {
+                    return children[i];
+                }
+            }
+
+            return null;
+        }
     }
 
-    public boolean isTerminator() {
-        return terminatorWord != null;
-    }
+    public abstract void addWords(List<String> words);
 
-    public String getWord() {
-        return terminatorWord;
-    }
+    public abstract TrieChildren getChildren();
 
-    public Map<Character, Trie> getChildren() {
-        return children;
-    }
+    public abstract boolean isTerminator();
 
     public Trie getChildForLetter(char letter) {
-        for(Map.Entry<Character, Trie> entry : children.entrySet()) {
-            if(entry.getKey() == letter) {
-                return entry.getValue();
-            }
-        }
-
-        return null;
-    }
-
-    private void addWordHelper(String word, int position) {
-        if(position < word.length()) {
-            // Add a child reachable from an edge labeled by the current
-            // letter, then continue with the rest of the word.
-            Character letter = word.charAt(position);
-            Trie child = children.get(letter);
-
-            if(child == null) {
-                child = new Trie();
-                children.put(letter, child);
-            }
-
-            child.addWordHelper(word, position + 1);
-        }
-        else {
-            // No letters left, mark the terminal node.
-            this.terminatorWord = word;
-        }
-    }
-
-    public void addWord(String word) {
-        if(word == null) {
-            throw new IllegalArgumentException("Word to add is null");
-        }
-
-        addWordHelper(word, 0);
+        TrieChildren children = getChildren();
+        return children.getChildForLetter(letter);
     }
 
     private int findWordHelper(String word, int position) {
@@ -99,7 +92,7 @@ public class Trie {
 
         if(position < word.length()) {
             Character letter = word.charAt(position);
-            Trie child = children.get(letter);
+            Trie child = getChildForLetter(letter);
 
             if(child != null) {
                 // Continue searching with the rest of the word and select
@@ -129,20 +122,36 @@ public class Trie {
             row[i] = i;
         }
 
-        for(Map.Entry<Character, Trie> entry : children.entrySet()) {
+        // Walk each branch starting from the root node.
+        List<Character> wordLetters = new ArrayList<Character>();
+        TrieChildren children = getChildren();
+
+        for(int i = 0; i < children.size(); i++) {
             findSimilarWordsImpl(pattern, maxError,
-                                 entry.getKey(), entry.getValue(),
-                                 row, similarWords);
+                                 children.getLetter(i), children.getChild(i),
+                                 wordLetters, row, similarWords);
         }
 
         return similarWords;
     }
 
+    private String buildWord(List<Character> letters) {
+        StringBuilder builder = new StringBuilder(letters.size());
+
+        for(char letter : letters) {
+            builder.append(letter);
+        }
+
+        return builder.toString();
+    }
+
     private void findSimilarWordsImpl(String pattern, int maxError, char letter, Trie node,
-                                      int[] previousRow, List<String> similarWords) {
+                                      List<Character> wordLetters, int[] previousRow,
+                                      List<String> similarWords) {
         int[] currentRow = new int[pattern.length() + 1];
+        int minError = previousRow[0] + 1;
         currentRow[0] = previousRow[0] + 1; // Compared to the empty string.
-        int minError = currentRow[0];
+        wordLetters.add(letter); // Append current letter to candidate.
 
         for(int i = 1; i <= pattern.length(); i++) {
             int insertionConst = currentRow[i - 1] + 1;
@@ -155,16 +164,20 @@ public class Trie {
 
         // Check if an accepted word has been found.
         if(currentRow[pattern.length()] <= maxError && node.isTerminator()) {
-            similarWords.add(node.getWord());
+            similarWords.add(buildWord(wordLetters));
         }
 
         // Process the children if valid words could still be found.
         if(minError <= maxError) {
-            for(Map.Entry<Character, Trie> entry : node.getChildren().entrySet()) {
+            TrieChildren children = node.getChildren();
+
+            for(int i = 0; i < children.size(); i++) {
                 findSimilarWordsImpl(pattern, maxError,
-                                     entry.getKey(), entry.getValue(),
-                                     currentRow, similarWords);
+                                     children.getLetter(i), children.getChild(i),
+                                     wordLetters, currentRow, similarWords);
             }
         }
+
+        wordLetters.remove(wordLetters.size() - 1);
     }
 }

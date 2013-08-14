@@ -130,10 +130,11 @@ public class FuzzyMatching {
 
         while(!worklist.isEmpty()) {
             ExecutionState currentState = worklist.remove(worklist.size() - 1);
+            Trie.TrieChildren children = currentState.trieNode.getChildren();
 
-            for(Map.Entry<Character, Trie> child : currentState.trieNode.getChildren().entrySet()) {
-                char trieLetter = child.getKey();
-                Trie trieChild = child.getValue();
+            for(int i = 0; i < children.size(); i++) {
+                char trieLetter = children.getLetter(i);
+                Trie trieChild = children.getChild(i);
                 State nextState = currentState.state.getStateForLetter(trieLetter);
 
                 if(nextState != null) {
@@ -158,10 +159,11 @@ public class FuzzyMatching {
 
         while(!worklist.isEmpty()) {
             ExecutionState currentState = worklist.remove(worklist.size() - 1);
+            Trie.TrieChildren children = currentState.trieNode.getChildren();
 
-            for(Map.Entry<Character, Trie> child : currentState.trieNode.getChildren().entrySet()) {
-                char trieLetter = child.getKey();
-                Trie trieChild = child.getValue();
+            for(int i = 0; i < children.size(); i++) {
+                char trieLetter = children.getLetter(i);
+                Trie trieChild = children.getChild(i);
                 State nextState = currentState.state.getStateForLetter(trieLetter);
 
                 if(nextState != null) {
@@ -259,11 +261,12 @@ public class FuzzyMatching {
 
         while(!worklist.isEmpty()) {
             ExecutionState currentState = worklist.remove(worklist.size() - 1);
+            Trie.TrieChildren children = currentState.trieNode.getChildren();
 
-            for(Map.Entry<Character, Trie> child : currentState.trieNode.getChildren().entrySet()) {
+            for(int i = 0; i < children.size(); i++) {
                 // Check which of the possible letters are accepted by the automaton.
-                char trieLetter = child.getKey();
-                Trie trieChild = child.getValue();
+                char trieLetter = children.getLetter(i);
+                Trie trieChild = children.getChild(i);
                 State nextState = currentState.state.getStateForLetter(trieLetter);
 
                 if(nextState != null) {

@@ -30,6 +30,7 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Driver {
@@ -60,7 +61,7 @@ public class Driver {
 
     private static Trie buildTrie(String filePath) throws IOException {
         FileInputStream stream = null;
-        Trie trie = new Trie();
+        List<String> words = new ArrayList<String>();
 
         try {
             stream = new FileInputStream(filePath);
@@ -68,7 +69,7 @@ public class Driver {
             String line = reader.readLine();
 
             while(line != null) {
-                trie.addWord(line.trim());
+                words.add(line.trim());
                 line = reader.readLine();
             }
         }
@@ -80,6 +81,9 @@ public class Driver {
             if(stream != null) stream.close();
         }
 
+        // Trie trie = new SimpleTrie();
+        Trie trie = new CompactTrie();
+        trie.addWords(words);
         return trie;
     }
 
