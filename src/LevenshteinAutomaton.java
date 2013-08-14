@@ -459,9 +459,8 @@ public class LevenshteinAutomaton {
             }
 
             for(Transition transition : candidate.state.getLetterTransitions()) {
-                if(transition.isAnyTransition() ||
-                   (transition.isLetterTransition() &&
-                    (candidateWord.charAt(candidate.wordPosition) == transition.getLetter()))) {
+                if(transition.isLetterTransition(candidateWord.charAt(candidate.wordPosition)) ||
+                   transition.isAnyTransition()) {
                     for(State nextState : transition.getNextStates()) {
                         worklist.add(new ExecutionState(nextState, candidate.wordPosition + 1));
                     }

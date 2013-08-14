@@ -80,6 +80,12 @@ public class Transition {
         return type == TransitionType.Letter;
     }
 
+    public boolean isLetterTransition(char transitionLetter) {
+        return (type == TransitionType.Letter) &&
+                (letter == transitionLetter);
+
+    }
+
     public char getLetter() {
         return letter;
     }
