@@ -1,6 +1,3 @@
-import java.util.Collections;
-import java.util.List;
-
 // Copyright (c) 2013 Gratian Lup. All rights reserved.
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -32,6 +29,9 @@ import java.util.List;
 // THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+import java.util.Collections;
+import java.util.List;
+
 public class CompactTrie extends Trie {
     // Used to create links into the main Trie 
     // which hols the actual node and edge data.
