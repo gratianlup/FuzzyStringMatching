@@ -206,37 +206,21 @@ public class Driver {
                                                    parsedArgs.maxErrors, cache);
 
         // Find the similar words for each word in the test file.
+        List<String> testWords = readWordList(parsedArgs.testFile);
         long startTime = System.nanoTime();
         int matchingWordCount = 0;
-        FileInputStream stream = null;
 
-        try {
-            stream = new FileInputStream(parsedArgs.testFile);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            String line = reader.readLine();
+        for(String testWord : testWords) {
+            List<String> matchingWords = matching.findMatchingWords(testWord);
+            matchingWordCount += matchingWords.size();
 
-            while(line != null) {
-                //List<String> matchingWords = matching.findMatchingWords(line.trim());
-                List<String> matchingWords = LevenshteinDistance.findAcceptedWords(dictionaryWords, line.trim(), 2);
-                matchingWordCount += matchingWords.size();
+            if(parsedArgs.verbose) {
+                System.out.println("Similar words to " + testWord + ":");
 
-                if(parsedArgs.verbose) {
-                    System.out.println("Similar words to " + line + ":");
-
-                    for(String word : matchingWords) {
-                        System.out.println("    " + word);
-                    }
+                for(String word : matchingWords) {
+                    System.out.println("    " + word);
                 }
-
-                line = reader.readLine();
             }
-        }
-        catch(IOException ex) {
-            System.out.println("Failed to read test file!");
-            return;
-        }
-        finally {
-            if(stream != null) stream.close();
         }
 
         double duration = (double)(System.nanoTime() - startTime) / 1.0e9;
