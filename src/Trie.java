@@ -72,12 +72,16 @@ public abstract class Trie {
         }
     }
 
+    // Builds a Trie contatining all specified words.
     public abstract void addWords(List<String> words);
 
+    // Retrieves the children of the Trie node.
     public abstract TrieChildren getChildren();
 
     public abstract boolean isTerminator();
 
+    // Returns the Trie node assocaited with the specified letter,
+    // or null if such a node does not exist.
     public Trie getChildForLetter(char letter) {
         TrieChildren children = getChildren();
         return children.getChildForLetter(letter);
