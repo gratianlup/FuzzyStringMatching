@@ -59,7 +59,7 @@ public class Driver {
         }
     }
 
-    private static Trie buildTrie(String filePath) throws IOException {
+    private static List<String> readWordList(String filePath) throws IOException {
         FileInputStream stream = null;
         List<String> words = new ArrayList<String>();
 
@@ -81,6 +81,10 @@ public class Driver {
             if(stream != null) stream.close();
         }
 
+        return words;
+    }
+
+    private static Trie buildTrie(List<String> words) {
         // Trie trie = new SimpleTrie();
         Trie trie = new CompactTrie();
         trie.addWords(words);
@@ -187,11 +191,15 @@ public class Driver {
             return;
         }
 
-        System.out.println("Building tries...");
-        Trie dictionaryTrie = buildTrie(parsedArgs.dictionaryFile);
-        Trie reversedDictionaryTrie = parsedArgs.reversedDictionaryFile != null ?
-                                      buildTrie(parsedArgs.reversedDictionaryFile) : null;
-        System.out.println("Tries built.");
+        // Read the dictionaries and build the tries.
+        List<String> dictionaryWords = readWordList(parsedArgs.dictionaryFile);
+        Trie dictionaryTrie = buildTrie(dictionaryWords);
+        Trie reversedDictionaryTrie = null;
+
+        if(parsedArgs.reversedDictionaryFile != null) {
+            List<String> reversedDictionaryWords = readWordList(parsedArgs.reversedDictionaryFile);
+            reversedDictionaryTrie = buildTrie(reversedDictionaryWords);
+        }
 
         AutomatonCache cache = parsedArgs.useCache ? new SimpleAutomatonCache() : null;
         FuzzyMatching matching = new FuzzyMatching(dictionaryTrie, reversedDictionaryTrie,
@@ -208,7 +216,8 @@ public class Driver {
             String line = reader.readLine();
 
             while(line != null) {
-                List<String> matchingWords = matching.findMatchingWords(line.trim());
+                //List<String> matchingWords = matching.findMatchingWords(line.trim());
+                List<String> matchingWords = LevenshteinDistance.findAcceptedWords(dictionaryWords, line.trim(), 2);
                 matchingWordCount += matchingWords.size();
 
                 if(parsedArgs.verbose) {
