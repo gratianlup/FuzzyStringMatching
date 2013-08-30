@@ -36,6 +36,7 @@ public class LevenshteinDistance {
     public static int computeDistance(String word, String pattern) {
         // Implements the classic dynamic-programming algorithm for
         // the Levenshtein distance using equal penalty for all edit operations.
+        // No attempt to optimize for space and/or speed is made.
         int[][] distance = new int[word.length() + 1][pattern.length() + 1];
 
         for(int i = 0; i <= word.length(); i++) {
