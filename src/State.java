@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Represents a state in a NFA or DFA.
-// For DFA no epsilon transitions exist anymore.
+// For a DFA no epsilon transitions exist anymore.
 public class State {
     private boolean isFinal;              // Set if the state is an acceptance state.
     private List<Transition> transitions; // Transitions on letters.
