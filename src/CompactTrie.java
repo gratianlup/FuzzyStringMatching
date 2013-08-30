@@ -32,6 +32,9 @@
 import java.util.Collections;
 import java.util.List;
 
+// A compact representation of a trie using only arrays.
+// For large tries it can use up to 30 times less memory than SimpleTrie,
+// and it is also much faster to query (better use of the CPU cache).
 public class CompactTrie extends Trie {
     // Used to create links into the main Trie 
     // which hols the actual node and edge data.
@@ -46,6 +49,7 @@ public class CompactTrie extends Trie {
 
         @Override
         public void addWords(List<String> words) {
+            // This is just a proxy for an already created trie.
             throw new UnsupportedOperationException();
         }
 
@@ -141,6 +145,31 @@ public class CompactTrie extends Trie {
         childrenLetters[firstIndex + childIndex] = newLetter;
     }
 
+    @Override
+    public void addWords(List<String> words) {
+        // The words must be added in layers: first the first letter from all words,
+        // then the second letter, and so on, until nu suffix part remains.
+        // This algorithm always builds the children array correctly,
+        // but only if the words are sorted lexicographically.
+        int layer = 0;
+        boolean changed = true;
+        int rootNode = addNode(-1);
+        Collections.sort(words);
+
+        while(changed) {
+            changed = false;
+            layer++;
+
+            for(String word : words) {
+                if(layer <= word.length()) {
+                    // At least another iteration is required.
+                    changed = true;
+                    addWord(word, 0, layer, rootNode);
+                }
+            }
+        }
+    }
+
     public void addWord(String word, int position, int maxPosition, int nodeId) {
         if(position == maxPosition) {
             // Mark as terminator if the entire word has been processed.
@@ -171,31 +200,6 @@ public class CompactTrie extends Trie {
             }
 
             addWord(word, position + 1, maxPosition, childNodeId);
-        }
-    }
-
-    @Override
-    public void addWords(List<String> words) {
-        // The words must be added in layers: first the first letter from all words,
-        // then the second letter, and so on, until nu suffix part remains.
-        // This algorithm always builds the children array correctly,
-        // but only if the words are sorted lexicographically.
-        int layer = 0;
-        boolean changed = true;
-        int rootNode = addNode(-1);
-        Collections.sort(words);
-
-        while(changed) {
-            changed = false;
-            layer++;
-
-            for(String word : words) {
-                if(layer <= word.length()) {
-                    // At least another iteration is required.
-                    changed = true;
-                    addWord(word, 0, layer, rootNode);
-                }
-            }
         }
     }
 
