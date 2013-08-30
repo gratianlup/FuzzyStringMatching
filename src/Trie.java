@@ -137,16 +137,6 @@ public abstract class Trie {
         return similarWords;
     }
 
-    private String buildWord(List<Character> letters) {
-        StringBuilder builder = new StringBuilder(letters.size());
-
-        for(char letter : letters) {
-            builder.append(letter);
-        }
-
-        return builder.toString();
-    }
-
     private void findSimilarWordsImpl(String pattern, int maxError, char letter, Trie node,
                                       List<Character> wordLetters, int[] previousRow,
                                       List<String> similarWords) {
@@ -181,5 +171,15 @@ public abstract class Trie {
         }
 
         wordLetters.remove(wordLetters.size() - 1);
+    }
+    
+    private String buildWord(List<Character> letters) {
+        StringBuilder builder = new StringBuilder(letters.size());
+
+        for(char letter : letters) {
+            builder.append(letter);
+        }
+
+        return builder.toString();
     }
 }
